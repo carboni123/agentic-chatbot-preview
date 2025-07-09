@@ -205,7 +205,7 @@ export const AgenticChatbot: React.FC<AgenticChatbotProps> = ({
     };
 
     return (
-        <div className="relative flex w-full max-w-7xl h-screen sm:h-[90vh] bg-white sm:shadow-2xl sm:rounded-lg overflow-hidden">
+        <div className="relative flex w-full h-full bg-white overflow-hidden">
             <input type="file" ref={fileInputRef} onChange={handleLoadFile} className="hidden" accept="application/json" />
 
             {isConfigPanelOpen && <div onClick={() => setIsConfigPanelOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" />}

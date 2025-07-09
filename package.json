@@ -1,6 +1,6 @@
 {
   "name": "agentic-chatbot-preview",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A reusable, customizable React component for creating and testing agentic chatbots. It provides a WhatsApp-like UI and a powerful interface for integrating with your own agent backend logic.",
   "author": "carboni123",
   "license": "MIT",
