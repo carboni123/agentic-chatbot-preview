@@ -1,0 +1,18 @@
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist
+lib
+
+# Dependency directories
+node_modules
+
+# Config files
+tsconfig.json
+.vscode/
+
+# Source code (we only ship the compiled dist)
+src/

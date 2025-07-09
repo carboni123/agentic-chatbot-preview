@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": false,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": false, // Set to false to allow tsc to output files
+        "outDir": "dist", // Output directory for compiled files
+        "rootDir": "src", // The root of your source code
+        "jsx": "react-jsx",
+        "declaration": true, // Generates .d.ts type definition files
+        "declarationDir": "dist/types", // Output directory for types
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    "include": [
+        "src"
+    ], // Only compile files in the src folder
+    "exclude": [
+        "node_modules",
+        "dist",
+        "src/**/*.test.tsx",
+        "src/components/ChatPage.tsx",
+        "src/components/NotFoundPage.tsx"
+    ] // Exclude non-library components
+}
