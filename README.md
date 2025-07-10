@@ -7,7 +7,7 @@ A reusable, customizable React component for creating and testing agentic chatbo
 -   **Modular Design**: Easily integrate into any React/TypeScript project.
 -   **Backend Agnostic**: Connect to any agent backend via a simple props-based API.
 -   **Customizable UI**: Change titles, profile pictures, and more.
--   **Full Chat Functionality**: Supports sending messages, receiving real-time updates via WebSockets, and displaying system notifications.
+-   **Full Chat Functionality**: Supports sending messages, receiving real-time updates via Server-Sent Events (SSE), and displaying system notifications.
 -   **Agent Configuration**: Includes a side panel to dynamically change the agent's system prompt and conversation starters.
 -   **Session Management**: Save and load entire conversations, including agent settings and message history.
 
@@ -23,7 +23,7 @@ yarn add agentic-chatbot-preview
 You will also need to have `react` and `react-dom` as dependencies in your project.
 
 ```bash
-npm install react react-dom socket.io-client
+npm install react react-dom
 ```
 
 ## Usage Example
@@ -33,13 +33,13 @@ Here's how to integrate `AgenticChatbot` into your application. You provide the 
 ```tsx
 // src/App.tsx
 import React from 'react';
-import { AgenticChatbot, AgentConfig, ConversationData } from 'agentic-chatbot-component';
+import { AgenticChatbot, AgentConfig, ConversationData } from 'agentic-chatbot-preview';
 import 'path/to/your/tailwind.css'; // Make sure to include Tailwind CSS
 
 const App = () => {
   // Define your backend endpoints
   const backendConfig = {
-    socketUrl: 'http://localhost:5000',
+    sseUrl: 'http://localhost:5000/api/v1/agent-test/stream',
     respondUrl: 'http://localhost:5000/api/v1/agent-test/respond',
     resetUrl: 'http://localhost:5000/api/v1/agent-test/reset',
     loadHistoryUrl: 'http://localhost:5000/api/v1/agent-test/load_history',
@@ -66,7 +66,7 @@ const App = () => {
       const errorText = await response.text();
       throw new Error(`Backend Error: ${response.status} - ${errorText}`);
     }
-    // The component will receive the agent's reply via WebSocket.
+    // The component will receive the agent's reply via its SSE connection.
   };
 
   // Your custom logic for resetting the conversation state
@@ -124,7 +124,7 @@ export default App;
 
 | Prop                  | Type                                                               | Required | Description                                                                                                       |
 | --------------------- | ------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `backendConfig`       | `BackendConfig`                                                    | Yes      | An object containing all necessary backend URLs.                                                                  |
+| `backendConfig`       | `BackendConfig`                                                    | Yes      | An object containing all necessary backend URLs, including the SSE stream endpoint.                               |
 | `initialSenderId`     | `string`                                                           | Yes      | The initial unique identifier for the user.                                                                       |
 | `onSendMessage`       | `(text, senderId, config) => Promise<void>`                        | Yes      | Callback function that implements the logic to send a message to your agent.                                      |
 | `onResetSession`      | `(senderId) => Promise<void>`                                      | Yes      | Callback function that implements the logic to reset the conversation on your backend.                            |
@@ -135,5 +135,3 @@ export default App;
 | `enableConfigPanel`   | `boolean`                                                          | No       | Set to `false` to completely hide the agent settings panel. Defaults to `true`.                                   |
 | `onSenderIdChange`    | `(newId: string) => void`                                          | No       | Callback fired when the user's sender ID is changed via the UI.                                                   |
 | `onConfigChange`      | `(newConfig: AgentConfig) => void`                                 | No       | Callback fired whenever a setting in the configuration panel is changed.                                          |
-
-This structure transforms your project into a true component library, separating concerns cleanly and providing a flexible, powerful API for other developers to integrate into their own projects.

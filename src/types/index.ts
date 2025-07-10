@@ -25,7 +25,7 @@ export interface AgentConfig {
  * Backend endpoint configuration.
  */
 export interface BackendConfig {
-    socketUrl: string;
+    sseUrl: string;
     respondUrl: string;
     resetUrl: string;
     loadHistoryUrl: string;

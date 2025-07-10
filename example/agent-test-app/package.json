@@ -10,10 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "agentic-chatbot-preview": "^1.0.0",
+    "agentic-chatbot-preview": "file:../..",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {

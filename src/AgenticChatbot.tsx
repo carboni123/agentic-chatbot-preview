@@ -1,6 +1,5 @@
 // src/AgenticChatbot.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
 import ChatHeader from './components/ChatHeader';
 import MessageList from './components/MessageList';
 import MessageInput from './components/MessageInput';
@@ -43,33 +42,55 @@ export const AgenticChatbot: React.FC<AgenticChatbotProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
 
-    const socketRef = useRef<Socket | null>(null);
+    const eventSourceRef = useRef<EventSource | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Connect to WebSocket for real-time agent messages
+    // Connect to SSE for real-time agent messages
     useEffect(() => {
-        const socket: Socket = io(backendConfig.socketUrl);
-        socketRef.current = socket;
+        // Close any existing connection
+        if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+        }
 
-        const joinRoom = () => socket.emit('join', { senderNumber: senderId });
-        socket.on('connect', joinRoom);
-        socket.on('agent_message', (payload: { text: string; sid?: string }) => {
-            const newMessage: Message = {
-                sid: payload.sid || generateMessageSid(payload.text, 'B', 'BR'),
-                text: payload.text,
-                type: 'received',
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                senderName: 'Agent',
-            };
-            setMessages(prev => [...prev, newMessage]);
-        });
+        // Establish a new EventSource connection.
+        const eventSource = new EventSource(`${backendConfig.sseUrl}?senderNumber=${encodeURIComponent(senderId)}`);
+        eventSourceRef.current = eventSource;
 
-        return () => {
-            socket.off('agent_message');
-            socket.off('connect', joinRoom);
-            socket.disconnect();
+        // Handle incoming messages from the server
+        eventSource.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                if (payload.text) {
+                    const newMessage: Message = {
+                        sid: payload.sid || generateMessageSid(payload.text, 'B', 'BR'),
+                        text: payload.text,
+                        type: 'received',
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        senderName: 'Agent',
+                    };
+                    setMessages(prev => [...prev, newMessage]);
+                }
+            } catch (e) {
+                console.error("Failed to parse SSE message data:", e);
+            }
         };
-    }, [senderId, backendConfig.socketUrl]);
+
+        // Handle connection errors
+        eventSource.onerror = (err) => {
+            console.error('EventSource failed:', err);
+            setError('Connection to server lost. Please check your connection and refresh.');
+            eventSource.close();
+        };
+
+        // Cleanup function to close the connection when the component unmounts or senderId changes
+        return () => {
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+                eventSourceRef.current = null;
+            }
+        };
+    }, [senderId, backendConfig.sseUrl]);
+
 
     const addMessage = (message: Omit<Message, 'sid' | 'timestamp'>) => {
         const fullMessage: Message = {

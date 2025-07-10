@@ -8,7 +8,7 @@ import {
 function App() {
   // Define the backend endpoints pointing to your local server
   const backendConfig = {
-    socketUrl: 'http://localhost:5000',
+    sseUrl: 'http://localhost:5000/api/v1/agent-test/stream',
     respondUrl: 'http://localhost:5000/api/v1/agent-test/respond',
     resetUrl: 'http://localhost:5000/api/v1/agent-test/reset',
     loadHistoryUrl: 'http://localhost:5000/api/v1/agent-test/load_history',
@@ -19,23 +19,24 @@ function App() {
   const handleSendMessage = async (text: string, senderId: string, config: AgentConfig) => {
     console.log(`Sending message from ${senderId}: "${text}"`);
 
-    const formData = new URLSearchParams();
-    formData.append('Body', text);
-    formData.append('From', senderId);
-    formData.append('ProfileName', 'Component Test App');
-    formData.append('system_prompt', config.systemPrompt);
+    // --- CHANGED: Create a JSON payload ---
+    const payload = {
+      From: senderId,
+      Body: text,
+      system_prompt: config.systemPrompt
+    };
 
     const response = await fetch(backendConfig.respondUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString(),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Backend Error: ${response.status} - ${errorText}`);
     }
-    // The component will receive the agent's reply via its WebSocket connection.
+    // The component will receive the agent's reply via its SSE connection.
   };
 
   // Your custom logic for resetting the conversation state
@@ -70,13 +71,6 @@ function App() {
   return (
     // This outer div sets up the page background and centers the container
     <div className="flex justify-center items-center w-screen h-screen bg-gray-200 p-4">
-
-      {/*
-      *  --- THIS IS THE NEW CONTAINER ---
-      *  This div acts as the "column" or "frame" for your component.
-      *  We give it a max-width, a specific height, a shadow, and rounded corners.
-      *  Your chatbot component will now live inside this and fill it.
-    */}
       <div className="w-full max-w-2xl h-[90vh] shadow-2xl rounded-lg overflow-hidden">
         <AgenticChatbot
           backendConfig={backendConfig}
@@ -90,7 +84,7 @@ function App() {
           }}
           initialMessages={[{
             sid: 'system-welcome-01',
-            text: 'Welcome! This component now fits its container.',
+            text: 'Welcome! This component now uses SSE.',
             type: 'system',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           }]}
